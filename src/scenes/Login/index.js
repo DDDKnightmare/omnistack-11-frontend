@@ -30,6 +30,7 @@ export default function Login() {
 
             localStorage.setItem('id', id);
             localStorage.setItem('name', response.data.name);
+            localStorage.setItem('accessToken', response.headers['x-access-token']);
             history.push('Profile');
         }catch(e){
             if(e.response && e.response.data){
