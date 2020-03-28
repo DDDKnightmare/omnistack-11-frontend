@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useHistory} from 'react-router-dom';
 import {FiArrowLeft} from 'react-icons/fi';
 import api from '../../services/api';
 import {aes256Encrypt} from '../../utils/encryption'
@@ -16,6 +16,8 @@ export default function Register(){
     const [password, setPassword] = useState('');
     const [city, setCity] = useState('');
     const [uf, setUf] = useState('');
+
+    const history = useHistory();
 
     async function handleRegister(e){
         e.preventDefault();
@@ -37,7 +39,12 @@ export default function Register(){
         if(!/^(?![_\d].|.[_\d])\w{2}$/.test(uf)){
             return alert('Preencha o UF da cidade com um UF válido!')
         }
-        const {cipherText, iv} = aes256Encrypt(password, email);
+        const {cipherText, iv} = aes256Encrypt({
+            msg: password, 
+            pass: email,
+            ivEnc: 'hex',
+            passEnc: 'utf8'
+        });
         const data = {
             name,
             email,
@@ -50,6 +57,7 @@ export default function Register(){
         try{
             const response = await api.post('ongs', data);
             alert(`Seu id de acesso: ${response.data.id}`);
+            return history.push('/');
         }catch({response}){
             console.log(response);
             alert('Ocorreu um erro durante a requisição! Tente novamente mais tarde!');
@@ -82,7 +90,7 @@ export default function Register(){
                         type="email" 
                         placeholder="e-mail"
                         value={email}
-                        onChange={e => setEmail(e.target.value)}
+                        onChange={e => setEmail(e.target.value.toLowerCase())}
                         required
                     />
                     <input 
