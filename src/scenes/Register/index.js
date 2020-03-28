@@ -1,12 +1,61 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {Link} from 'react-router-dom';
 import {FiArrowLeft} from 'react-icons/fi';
+import api from '../../services/api';
+import {aes256Encrypt} from '../../utils/encryption'
 
 import './styles.css';
 
 import logoImg from '../../assets/logo.svg';
 
 export default function Register(){
+
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [whatsapp, setWhatsapp] = useState('');
+    const [password, setPassword] = useState('');
+    const [city, setCity] = useState('');
+    const [uf, setUf] = useState('');
+
+    async function handleRegister(e){
+        e.preventDefault();
+        if(!name){
+            return alert('Preencha o nome da ONG!');
+        }
+        if(!email){
+            return alert('Preencha o email da ONG!');
+        }
+        if(!(/^\d{2}?\d{11}$/.test(whatsapp))){
+            return alert('Preencha o campo whatsapp com um telefone válido!');
+        }
+        if(!password){
+            return alert('Preencha o campo senha!');
+        }
+        if(!city){
+            return alert('Preencha o cidade!');
+        }
+        if(!/^(?![_\d].|.[_\d])\w{2}$/.test(uf)){
+            return alert('Preencha o UF da cidade com um UF válido!')
+        }
+        const {cipherText, iv} = aes256Encrypt(password, email);
+        const data = {
+            name,
+            email,
+            whatsapp,
+            password: cipherText + '=' + iv,
+            city,
+            uf
+        }
+
+        try{
+            const response = await api.post('ongs', data);
+            alert(`Seu id de acesso: ${response.data.id}`);
+        }catch({response}){
+            console.log(response);
+            alert('Ocorreu um erro durante a requisição! Tente novamente mais tarde!');
+        }
+        
+    }
     return (
         <div className="register-container">
             <div className="content">
@@ -19,17 +68,50 @@ export default function Register(){
                         className="back-link"
                         to="/"
                     >
-                        <FiArrowLeft/> Voltar para 
+                        <FiArrowLeft/> Voltar para a home
                     </Link>
                 </section>
-                <form>
-                    <input placeholder="Nome da ONG"/>
-                    <input type="email" placeholder="e-mail"/>
-                    <input placeholder="Whatsapp"/>
-                    <input type="password" placeholder="Senha"/>
+                <form onSubmit={handleRegister}>
+                    <input 
+                        placeholder="Nome da ONG"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        required
+                    />
+                    <input 
+                        type="email" 
+                        placeholder="e-mail"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        required
+                    />
+                    <input 
+                        placeholder="Whatsapp"
+                        value={whatsapp}
+                        onChange={e => setWhatsapp(e.target.value)}
+                        required
+                    />
+                    <input 
+                        type="password" 
+                        placeholder="Senha"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        required
+                    />
                     <div className="input-group">
-                        <input placeholder="Cidade"/>
-                        <input placeholder="UF" style={{width: 80}}/>
+                        <input 
+                            placeholder="Cidade"
+                            value={city}
+                            onChange={e => setCity(e.target.value)}
+                            required
+                        />
+                        <input 
+                            placeholder="UF" 
+                            style={{width: 80}}
+                            value={uf}
+                            onChange={e => setUf(e.target.value)}
+                            required
+                        />
                     </div>
                     <button
                         type="submit"

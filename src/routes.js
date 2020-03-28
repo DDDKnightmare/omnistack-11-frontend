@@ -7,6 +7,8 @@ import React from 'react';
 
 import Register from './scenes/Register';
 import Login from './scenes/Login';
+import Profile from './scenes/Profile';
+import NewIncident from './scenes/NewIncident';
 
 export default function Routes(){
     return (
@@ -14,6 +16,8 @@ export default function Routes(){
             <Switch>
                 <Route path="/" exact component={Login}/>
                 <Route path="/register" component={Register}/>
+                <Route path="/profile" component={Profile} />
+                <Route path="/incidents/new" exact componet={NewIncident}/>
             </Switch>
         </BrowserRouter>
     )
